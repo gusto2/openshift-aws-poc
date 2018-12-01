@@ -18,7 +18,7 @@
 
     - name: docker storage conf file
       copy:
-        content: "DEVS=/dev/xvdb\nVG=docker-vg\n"
+        content: "DEVS=/dev/nvme1n1\nVG=docker-vg\n"
         dest: /etc/sysconfig/docker-storage-setup
 
     - name: docker-storage-setup
