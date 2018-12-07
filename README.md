@@ -13,6 +13,7 @@ main doc: https://sysdig.com/blog/deploy-openshift-aws/
 		
 aws s3 cp openshift_aws_base_01.yml s3://gabriel-personal/temp/openshift_aws_base_01.yml
 
+```
 aws cloudformation validate-template \
  --region eu-central-1 \
  --template-url "https://s3.eu-central-1.amazonaws.com/gabriel-personal/temp/openshift_aws_base_01.yml"
@@ -26,6 +27,7 @@ aws cloudformation create-stack \
    ParameterKey=AvailabilityZone,ParameterValue=eu-central-1a \
    ParameterKey=KeyName,ParameterValue=aws_keypair \
  --capabilities=CAPABILITY_IAM		
+```
 
 master:  master.os-dev.sse-consulting.eu 
 worker1: worker1.os-dev.sse-consulting.eu 
@@ -39,7 +41,7 @@ cd ..
 vi hosts
  - replace master-host-name
  - replace worker-host-name
- 
+``` 
 vi preconfig.yml
  
 test connection:
@@ -49,17 +51,18 @@ ansible-playbook -i hosts preconfig.yml --key-file aws_keypair_clear.pem
  
 ssh -l centos master
   sudo hostnamectl set-hostname master.os-dev.sse-consulting.eu --static
-  /etc/origin/master/openshift-master.kubeconfig -> server: master.os-dev.sse-consulting.eu
 ssh -l centos worker1
   sudo hostnamectl set-hostname worker1.os-dev.sse-consulting.eu --static
 ssh -l centosworker2
   sudo hostnamectl set-hostname worker2.os-dev.sse-consulting.eu --static
-  
+ ``` 
  
 ansible-playbook -c paramiko -i hosts openshift-ansible/playbooks/byo/config.yml --key-file aws_keypair_clear.pem
 
 SSH in the host you designated as master
   
+```
+/etc/origin/master/openshift-master.kubeconfig -> server: master.os-dev.sse-consulting.eu
 
   sudo vi /etc/origin/master/master-config.yaml
     change AWS url to master.os-dev.sse-consulting.eu
@@ -68,7 +71,7 @@ SSH in the host you designated as master
   oc get nodes
   sudo htpasswd -b /etc/openshift/openshift-passwd admin <your_pass>
   https://master.os-dev.sse-consulting.eu:8443
-  
+  ```
 
 
 
@@ -76,6 +79,7 @@ SSH in the host you designated as master
 
 copy images to local docker repo
 
+```
     oc get nodes
 	aws ecr get-login --no-include-email --region eu-central-1
 	sudo docker login -u AWS -p "generated_password" https://535544306598.dkr.ecr.eu-central-1.amazonaws.com 
@@ -110,13 +114,15 @@ copy images to local docker repo
 	sudo docker load -i wso2am-analytics-kubernetes-2.1.0.tgz
 	sudo docker load -i wso2am-kubernetes-2.1.0.tgz
 
-	
+```	
 	
 cd projects
 git clone https://rd_gabriel_vince@bitbucket.org/koenge/kubernetes-apim.git
 cd kubernetes-apim
 
 NFS:
+
+```
   sudo mkdir -p /mnt/data/wso2
   useradd -u 1000000000 wso2user
   sudo chown 1000000000 /mnt/data/wso2
@@ -127,7 +133,7 @@ mkdir -p /mnt/data/wso2/pattern-2/apim1
 mkdir -p /mnt/data/wso2/pattern-2/apim2
 mkdir -p /mnt/data/wso2/pattern-2-pv-3
 mkdir -p /mnt/data/wso2/pattern-2/apim3
-
+```
  
  
  NFS: 10.0.0.4
@@ -135,7 +141,7 @@ mkdir -p /mnt/data/wso2/pattern-2/apim3
  
  
 
-
+```
 
 oc login -u system:admin
 # oc create user admin --full-name=admin
@@ -155,6 +161,7 @@ sudo mkdir -p /mnt/data/exports/pattern-2/apim1
 sudo mkdir -p /mnt/data/exports/pattern-2/apim2
 sudo mkdir -p /mnt/data/exports/pattern-2/apim3
 sudo mkdir -p /tmp/data/pattern-2-pv-3
+```
 
 
         volumeMounts:
@@ -166,5 +173,5 @@ sudo mkdir -p /tmp/data/pattern-2-pv-3
         persistentVolumeClaim:
           claimName: apim-km-volume-claim
 
-
+```
 

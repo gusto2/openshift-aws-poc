@@ -18,7 +18,8 @@ Mappings:
     us-east-2:
       CentOS7: "ami-9cbf9bf9"
     eu-central-1:
-      CentOS7: "ami-9a183671"
+      # CentOS7: "ami-9a183671"
+      CentOS7: "ami-dd3c0f36"
 
 Resources:
 ##########
@@ -87,6 +88,7 @@ Resources:
           SubnetId: !Ref subnet
           GroupSet:
              - !Ref mastersecgroup
+             - !GetAtt openshiftvpc.DefaultSecurityGroup
       ImageId: !FindInMap [RegionMap, !Ref "AWS::Region", CentOS7]
 
   openshiftworker1:
@@ -221,10 +223,31 @@ Resources:
      InstanceId: !Ref openshiftmaster
      Domain:     !Ref openshiftvpc
 
+  SharedFileSystem:
+    Type: "AWS::EFS::FileSystem"
+    Properties: 
+      Encrypted: False
+      FileSystemTags:
+        - Key: Name
+          Value: Openshift shared storage
+      ThroughputMode: bursting
+
+  EFSMountTarget:
+    Type: AWS::EFS::MountTarget
+    Properties:
+      FileSystemId:
+        Ref: SharedFileSystem
+      SubnetId:
+        Ref: subnet
+      SecurityGroups:
+      - !GetAtt openshiftvpc.DefaultSecurityGroup
+
 Outputs:
   MasterIpAddress:
     Description: "IP address of the OpenShift master"
     Value: !Ref masterip
 
-
+  MountTargetID:
+    Description: Mount target URL
+    Value: !Join ['.', [ !Ref "EFSMountTarget", 'efs', !Ref "AWS::Region", 'amazonaws.com']]
 
